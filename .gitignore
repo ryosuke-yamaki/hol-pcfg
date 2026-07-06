@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# IDE / editor
+.idea/
+.vscode/
+.history/
+
+# OS
+.DS_Store
+
+# Secrets / local env
+.env
+docker-compose.override.yml
+
+# Claude Code local state
+.claude/
+.pytest_cache/
+
+# Datasets (regenerated per clone via scripts/, see README)
+data/
+
+# Experiment artifacts / outputs
+log/
+logs/
+results/
+runs/
+wandb/
+lightning_logs/
+ckpt/
+*.err
+*.out
+optuna_*journal.log
+
+# Generated sweep configs (recreated by scripts/launch_nt_sdim_sweep.py from the *_base.yaml templates)
+config/sweeps/nt_sdim/
+# Generated SemInfo sweep configs (recreated by scripts/seminfo/launch_seminfo_nt_sdim_sweep.py)
+config/sweeps/seminfo_nt_sdim/
+
+# Error analysis pipeline outputs (scripts/{dump_predictions,verify_f1_from_jsonl,analyze_error,render_b1_pdf}.py)
+# Keep the scripts tracked; ignore all generated artifacts (predictions JSONL,
+# reports, tree PDFs, sanity_check, etc.)
+analysis/error_analysis/
+
+# KTB char-level pipeline (scripts/prepare_ktb_char_data.sh, eval_phrase_projection.py,
+# export_char_morpheme_trees.py): cloned treebanks + generated prediction/eval artifacts.
+.ktb_workspace/
+analysis/ktb_char/
+analysis/ktb_char_smoke/

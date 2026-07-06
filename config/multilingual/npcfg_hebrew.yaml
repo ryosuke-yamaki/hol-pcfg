@@ -1,0 +1,55 @@
+device: 0
+save_dir : 'log'
+
+# N-PCFG (Neural PCFG, Kim et al. 2019a).
+# Hyperparameters follow Liu et al. 2023 (EMNLP Findings) Appendix B:
+#   s_dim=512, adam (b1=0.75, b2=0.999, lr=0.002), Xavier init.
+# Batch=8 (the HN/SN-PCFG 5-seed protocol uses 16): the inside chart's
+# cubic-in-NT broadcast peaks ~16-20 GiB. An A100-class GPU is recommended;
+# on a 24 GB GPU, drop to batch=4 (peak ~8-10 GiB).
+
+data:
+  train_file: 'data/clean/hebrew-train.pickle'
+  val_file:   'data/clean/hebrew-val.pickle'
+  test_file:  'data/clean/hebrew-test.pickle'
+  vocab_type: 'max_size'
+  vocab_size: 10000
+  min_freq: 2
+
+
+model:
+  model_name: 'NPCFG'
+  NT: 128
+  T: 256
+  s_dim: 512
+
+
+train:
+  batch_size: 8
+  max_epoch: 30
+  max_len: 40
+  curriculum: 0
+  start_len: 30
+  increment: 1
+  patience: 5
+  clip: 3
+
+
+test:
+  batch_size: 16
+  max_tokens: 100
+  bucket: 32
+  decode: 'mbr'
+  sampler: 'batch'
+
+optimizer:
+  name: 'adam'
+  lr: 0.002
+  mu: 0.75
+  nu: 0.999
+
+wandb:
+  enabled: true
+  project: hol-pcfg
+  run_name: npcfg-nt128-hebrew
+  tags: [npcfg, nt128, hebrew, spmrl-multilingual]

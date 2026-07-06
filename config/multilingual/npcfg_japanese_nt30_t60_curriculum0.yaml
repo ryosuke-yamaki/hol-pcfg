@@ -1,0 +1,53 @@
+device: 0
+save_dir : 'log'
+
+# KTB Japanese variant of config/baselines/npcfg_nt30_t60_curriculum0.yaml.
+# Build data with `bash scripts/prepare_ktb_data.sh`.
+
+data:
+  train_file: 'data/clean/japanese-ktb-len40-nopunct-train.pickle'
+  val_file: 'data/clean/japanese-ktb-len40-nopunct-val.pickle'
+  test_file: 'data/clean/japanese-ktb-len40-nopunct-test.pickle'
+  vocab_type: 'max_size'
+  vocab_size: 10000
+  min_freq: 2
+
+
+model:
+  model_name: 'NPCFG'
+  NT: 30
+  T: 60
+  s_dim: 256
+
+
+train:
+  batch_size: 4
+  max_epoch: 10
+  max_len: 40
+  # whether to use curriculum learning strategy.
+  curriculum: 0
+  start_len: 30
+  increment: 1
+  patience: 5
+  clip: 3
+
+
+test:
+  batch_size: 8
+  max_tokens: 100
+  bucket: 32
+  decode: 'mbr'
+  sampler: 'batch'
+
+optimizer:
+  name: 'adam'
+  lr: 0.001
+  mu: 0.75
+  nu: 0.999
+
+
+wandb:
+  enabled: True
+  project: 'hol-pcfg'
+  run_name: 'npcfg-nt30-ja-ktb-baseline'
+  tags: ['npcfg', 'baseline', 'nt30', 't60', 'ja', 'ktb', 'morpheme', '5seed']

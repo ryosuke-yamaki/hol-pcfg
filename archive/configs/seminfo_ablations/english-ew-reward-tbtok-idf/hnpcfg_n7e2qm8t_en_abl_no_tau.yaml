@@ -1,0 +1,90 @@
+device: 0
+save_dir: 'log'
+
+# Hyperparameters mirror the optuna-v3 phase2 rank2 trial 192
+# (W&B run n7e2qm8t = phase2-rank2-seed5).
+
+data:
+  train_file: 'data/seminfo/ptb_en-full.gd_instruction.batch.gpt4omini-ew-exp-tbtok-idf/train.pickle'
+  val_file: 'data/seminfo/ptb_en-full.gd_instruction.batch.gpt4omini-ew-exp-tbtok-idf/val.pickle'
+  test_file: 'data/seminfo/ptb_en-full.gd_instruction.batch.gpt4omini-ew-exp-tbtok-idf/test.pickle'
+  vocab_type: 'max_size'
+  vocab_size: 10000
+  min_freq: 2
+  language: "english"
+
+
+model:
+  model_name: 'HNPCFG-FixedCostReward'
+  NT: 1024
+  T: 2048
+  s_dim: 512
+  tau_root_init: 3.4131010967382855
+  tau_rule_init: 3.3579738083268276
+  tau_term_init: 1.8255916354523003
+  learnable_temperature: false
+
+
+experimental:
+  # Reward shaping / PAS
+  min_span_reward: -4.
+  alignment_coefficient: 1.
+  adversarial_coefficient: 0.
+  pas_subsample_count: 0
+  renormalizing_marginals: False
+
+  weigh_nll_loss: True
+  suppress_pas_contrib: False
+  flag_curriculum_learning: False
+
+  # Sem-Info defaults (RL with log-tfidf reward, CRF sampling)
+  mode: "rl"
+  mode_reward: "log_tfidf"
+  sample_mode: "crf"
+  num_samples: 2
+
+  hit_count_threshold: 2
+  activation_flood: 0.001
+
+  mode_offending_spans: True
+  spancomp_loss_weight: 4.
+
+  # RL coefficient warmup (scheduler.WarmupScheduler)
+  rl_warmup_steps: 1000
+  rl_start_step: 0
+  rl_initial_coeff: 0.
+  rl_target_coeff: 1.
+  rl_len_norm: False
+  apply_mean_baseline: True
+
+  # Maxent regularizer (held constant, no warmup)
+  maxent_initial_coeff: -0.001
+  maxent_target_coeff: -0.001
+
+
+train:
+  batch_size: 4
+  max_epoch: 10
+  max_len: 40
+  max_steps: 100000
+  min_steps: 30000
+  curriculum: 0
+  start_len: 30
+  increment: 1
+  patience: 5
+  clip: 3
+
+
+test:
+  batch_size: 2
+  max_tokens: 100
+  bucket: 32
+  decode: 'mbr'
+  sampler: 'batch'
+
+
+optimizer:
+  name: 'adam'
+  lr: 0.0011560600062120669
+  mu: 0.75
+  nu: 0.999

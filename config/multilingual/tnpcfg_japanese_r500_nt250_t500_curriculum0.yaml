@@ -1,0 +1,64 @@
+device: 0
+save_dir : 'log'
+
+# KTB Japanese variant of config/baselines/tnpcfg_r500_nt250_t500_curriculum0.yaml.
+# Build data with `bash scripts/prepare_ktb_data.sh`.
+
+data:
+  train_file: 'data/clean/japanese-ktb-len40-nopunct-train.pickle'
+  val_file: 'data/clean/japanese-ktb-len40-nopunct-val.pickle'
+  test_file: 'data/clean/japanese-ktb-len40-nopunct-test.pickle'
+  use_cache: 0
+  cache: 0
+  vocab_cache: 'data/clean/japanese-ktb-len40-nopunct-vocab.pickle'
+  train_dataset_cache: 'data/clean/japanese-ktb-len40-nopunct-train-cache.pickle'
+  val_dataset_cache: 'data/clean/japanese-ktb-len40-nopunct-val-cache.pickle'
+  test_dataset_cache: 'data/clean/japanese-ktb-len40-nopunct-test-cache.pickle'
+  vocab_type: 'max_size'
+  vocab_size: 10000
+  min_freq: 2
+
+model:
+  model_name: 'TNPCFG'
+  NT: 250
+  T: 500
+  r_dim: 500
+  s_dim: 256
+  word_emb_size: 200
+  shared: 0
+
+train:
+  batch_size: 4
+  max_epoch: 10
+  max_len: 40
+
+  # whether to use curriculum learning strategy.
+  curriculum: 0
+  start_len: 20
+  increment: 10
+
+  patience: 5
+  clip: 3
+
+
+test:
+  batch_size: 8
+  max_tokens: 100
+  bucket: 32
+  # viterbi or mbr
+  decode: 'mbr'
+  # batch or token
+  sampler: 'batch'
+
+optimizer:
+  name: 'adam'
+  lr: 0.001
+  mu: 0.75
+  nu: 0.999
+
+
+wandb:
+  enabled: True
+  project: 'hol-pcfg'
+  run_name: 'tnpcfg-r500-nt250-ja-ktb-baseline'
+  tags: ['tnpcfg', 'baseline', 'r500', 'nt250', 't500', 'ja', 'ktb', 'morpheme', '5seed']

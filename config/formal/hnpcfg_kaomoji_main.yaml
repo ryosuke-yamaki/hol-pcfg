@@ -1,0 +1,45 @@
+data:
+  collapse_numbers: false
+  lowercase: false
+  min_freq: 2
+  test_file: data/clean/kaomoji-test.pickle
+  train_file: data/clean/kaomoji-train.pickle
+  val_file: data/clean/kaomoji-val.pickle
+  vocab_size: 5000
+  vocab_type: max_size
+device: 0
+model:
+  NT: 4096
+  T: 8192
+  model_name: HNPCFG
+  s_dim: 512
+  tau_root_init: 1.96639395077448
+  tau_rule_init: 12.737609884132324
+  tau_term_init: 9.242005338216677
+optimizer:
+  lr: 0.002576751484771699
+  mu: 0.75
+  name: adam
+  nu: 0.999
+  relation_weight_decay: 0.0
+save_dir: log
+test:
+  batch_size: 16
+  bucket: 32
+  decode: mbr
+  max_tokens: 100
+  sampler: batch
+train:
+  batch_size: 16
+  clip: 3
+  curriculum: 0
+  increment: 1
+  max_epoch: 30
+  max_len: 40
+  patience: 10
+  start_len: 30
+wandb:
+  enabled: true
+  project: hol-pcfg
+  run_name: hnpcfg-nt4096-kaomoji
+  tags: [hnpcfg, nt4096, kaomoji, character-level, formal-language]

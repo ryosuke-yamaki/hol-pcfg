@@ -1,0 +1,58 @@
+# HN-PCFG LL config for CHARACTER-level KTB Japanese.
+# Mirrors config/multilingual/hnpcfg_japanese.yaml (same model size / HPs so the projected
+# phrase-structure UF1 is comparable to the morpheme baseline); only data paths,
+# batch_size, max_len and run_name differ. Each token is a single character, so
+# the parser must induce morphological segmentation on its own.
+
+device: 0
+save_dir: 'log'
+
+data:
+  train_file: 'data/clean/japanese-ktb-char-train.pickle'
+  val_file:   'data/clean/japanese-ktb-char-val.pickle'
+  test_file:  'data/clean/japanese-ktb-char-test.pickle'
+  vocab_type: 'max_size'
+  vocab_size: 10000            # effective = #unique chars (~2-4k); kept = baseline
+  min_freq: 2
+
+model:
+  model_name: 'HNPCFG'
+  NT: 4096                     # baseline size kept for a fair comparison
+  T: 8192
+  s_dim: 512
+  tau_root_init: 1.96639395077448
+  tau_rule_init: 12.737609884132324
+  tau_term_init: 9.242005338216677
+
+train:
+  batch_size: 16               # = baseline. Empirically batch=4 used only ~5.4GB on a
+                               # 48GB GPU at max_len=120, so 16 fits (~20GB) and matches
+                               # the morpheme baseline batch for a fairer comparison.
+                               # On smaller GPUs drop to 8/4.
+  max_epoch: 30
+  max_len: 120                 # <=40 morphemes -> ~110-120 chars; keep all. OOM -> 100
+  curriculum: 0
+  start_len: 30
+  increment: 1
+  patience: 10
+  clip: 3
+
+test:
+  batch_size: 16
+  max_tokens: 100
+  bucket: 32
+  decode: 'mbr'
+  sampler: 'batch'
+
+optimizer:
+  name: 'adam'
+  lr: 0.002576751484771699
+  mu: 0.75
+  nu: 0.999
+  relation_weight_decay: 0.0
+
+wandb:
+  enabled: true
+  project: 'hol-pcfg'
+  run_name: 'hnpcfg-p3-eji18kkl-ja-char'
+  tags: ['hnpcfg', 'nt4096', 'p3-eji18kkl', 'ja', 'ktb', 'char']

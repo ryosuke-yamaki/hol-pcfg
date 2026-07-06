@@ -1,0 +1,29 @@
+# Python deps installed into the nvcr.io/nvidia/pytorch container.
+# torch / triton / CUDA come from the base image; fastNLP is vendored in-tree
+# (see fastNLP/LOCAL_PATCHES.md) and is NOT pip-installed.
+easydict
+pyyaml
+nltk
+click
+tqdm
+wandb
+prettytable
+optuna
+
+# scikit-learn / umap-learn: scripts/c0_phase_landscape/cossin_pca_viz.py 2D
+# projections (PCA + t-SNE always; UMAP is the optional --method umap mode,
+# imported lazily). scikit-learn also backs the pre-existing PCA path.
+scikit-learn
+umap-learn
+
+# SemInfo (vendored parsing_by_maxseminfo). triton is intentionally NOT pinned
+# here (it comes from the base image); easydict / nltk / wandb / prettytable
+# above are shared. transformers / lightning pins match the upstream setup.py.
+lightning==2.4.0
+transformers==4.48
+spacy
+PyStemmer
+sympy
+tensorboard
+matplotlib
+openai

@@ -1,0 +1,47 @@
+device: 0
+save_dir : 'log'
+
+# KTB (Keyaki Treebank) Japanese, len40 / no-punct.
+# Build pickles with `bash scripts/prepare_ktb_data.sh` (see README).
+data:
+  train_file: 'data/clean/japanese-ktb-len40-nopunct-train.pickle'
+  val_file: 'data/clean/japanese-ktb-len40-nopunct-val.pickle'
+  test_file: 'data/clean/japanese-ktb-len40-nopunct-test.pickle'
+  vocab_type: 'max_size'
+  vocab_size: 10000
+  min_freq: 2
+
+model:
+  model_name: 'SNPCFG'
+  NT: 4096
+  T: 8192
+  s_dim: 512
+
+train:
+  batch_size: 16
+  max_epoch: 30
+  max_len: 40
+  curriculum: 0
+  start_len: 30
+  increment: 1
+  patience: 5
+  clip: 3
+
+test:
+  batch_size: 16
+  max_tokens: 100
+  bucket: 32
+  decode: 'mbr'
+  sampler: 'batch'
+
+optimizer:
+  name: 'adam'
+  lr: 0.002
+  mu: 0.75
+  nu: 0.999
+
+wandb:
+  enabled: True
+  project: 'hol-pcfg'
+  run_name: 'snpcfg-nt4096-ja-nll'
+  tags: ['nll-only', 'snpcfg', 'baseline', 'nt4096', 'ja', 'ktb']

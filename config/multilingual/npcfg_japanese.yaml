@@ -1,0 +1,59 @@
+device: 0
+save_dir : 'log'
+
+# N-PCFG (Neural PCFG, Kim et al. 2019a) for KTB Japanese.
+# Hyperparameters follow Liu et al. 2023 (EMNLP Findings) Table 4 row:
+#   "N-PCFG† NT=128, S-F1=56.7±3.7 on PTB"
+# Appendix B: s_dim=512, adam (β1=0.75, β2=0.999, lr=0.002), Xavier init.
+# Batch=16 matches the HN/SN-PCFG 5-seed protocol but REQUIRES an A100 (40GB+
+# minimum, 80GB recommended): the inside chart's cubic-in-NT broadcast hits
+# ~32 GiB peak. On a 24 GB GPU, drop to batch=4 (peak ~8-10 GiB).
+# Liu et al. (2023) note: "N-PCFG runs into memory issues even with NT=256",
+# which is the same scaling effect.
+
+data:
+  train_file: 'data/clean/japanese-ktb-len40-nopunct-train.pickle'
+  val_file:   'data/clean/japanese-ktb-len40-nopunct-val.pickle'
+  test_file:  'data/clean/japanese-ktb-len40-nopunct-test.pickle'
+  vocab_type: 'max_size'
+  vocab_size: 10000
+  min_freq: 2
+
+
+model:
+  model_name: 'NPCFG'
+  NT: 128
+  T: 256
+  s_dim: 512
+
+
+train:
+  batch_size: 8
+  max_epoch: 30
+  max_len: 40
+  curriculum: 0
+  start_len: 30
+  increment: 1
+  patience: 5
+  clip: 3
+
+
+test:
+  batch_size: 16
+  max_tokens: 100
+  bucket: 32
+  decode: 'mbr'
+  sampler: 'batch'
+
+optimizer:
+  name: 'adam'
+  lr: 0.002
+  mu: 0.75
+  nu: 0.999
+
+
+wandb:
+  enabled: True
+  project: 'hol-pcfg'
+  run_name: 'npcfg-nt128-ja-nll'
+  tags: ['nll-only', 'npcfg', 'baseline', 'nt128', 'ja', 'ktb', 'liu2023-table4']

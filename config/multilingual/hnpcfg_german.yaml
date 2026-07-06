@@ -1,0 +1,49 @@
+device: 0
+save_dir: 'log'
+
+data:
+  train_file: 'data/clean/german-train.pickle'
+  val_file: 'data/clean/german-val.pickle'
+  test_file: 'data/clean/german-test.pickle'
+  vocab_type: 'max_size'
+  vocab_size: 10000
+  min_freq: 2
+
+model:
+  model_name: 'HNPCFG'
+  NT: 4096
+  T: 8192
+  s_dim: 512
+  tau_root_init: 1.96639395077448
+  tau_rule_init: 12.737609884132324
+  tau_term_init: 9.242005338216677
+
+train:
+  batch_size: 16
+  max_epoch: 30
+  max_len: 40
+  curriculum: 0
+  start_len: 30
+  increment: 1
+  patience: 10
+  clip: 3
+
+test:
+  batch_size: 16
+  max_tokens: 100
+  bucket: 32
+  decode: 'mbr'
+  sampler: 'batch'
+
+optimizer:
+  name: 'adam'
+  lr: 0.002576751484771699
+  mu: 0.75
+  nu: 0.999
+  relation_weight_decay: 0.0
+
+wandb:
+  enabled: true
+  project: 'hol-pcfg'
+  run_name: 'hnpcfg-p3-eji18kkl-de'
+  tags: ['hnpcfg', 'nt4096', 'p3-eji18kkl', 'paper', 'multilingual', 'de']

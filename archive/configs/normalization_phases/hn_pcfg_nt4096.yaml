@@ -1,0 +1,48 @@
+device: 0
+save_dir: 'log'
+
+data:
+  train_file: 'data/ptb-train.pickle'
+  val_file: 'data/ptb-val.pickle'
+  test_file: 'data/ptb-test.pickle'
+  vocab_type: 'max_size'
+  vocab_size: 10000
+  min_freq: 2
+
+model:
+  model_name: 'HNPCFG'
+  NT: 4096
+  T: 8192
+  s_dim: 512
+  # tau_root_init: 1.0
+  # tau_term_init: 1.0
+  # tau_rule_init: 1.0
+
+train:
+  batch_size: 32
+  max_epoch: 30
+  max_len: 40
+  curriculum: 0
+  start_len: 30
+  increment: 1
+  patience: 5
+  clip: 3
+
+test:
+  batch_size: 16
+  max_tokens: 100
+  bucket: 32
+  decode: 'mbr'
+  sampler: 'batch'
+
+optimizer:
+  name: 'adam'
+  lr: 0.00458
+  mu: 0.5
+  nu: 0.999
+
+wandb:
+  enabled: True
+  project: 'hol-pcfg'
+  run_name: 'hnpcfg-nt4096-nll'
+  tags: ['nll-only', 'hnpcfg', 'nt4096']

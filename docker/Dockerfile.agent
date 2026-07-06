@@ -1,0 +1,49 @@
+# Agent tooling image: extends the research image (docker/Dockerfile) with the
+# repo owner's in-container developer tooling — Node.js, the Notion MCP server,
+# Claude Code, and the Codex CLI. None of this is needed to train or evaluate;
+# it is opt-in via docker-compose.override.yml (see
+# docker-compose.override.example.yml). BASE_IMAGE must point at the already
+# built research image tag (${IMAGE_NAME}).
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+USER root
+
+# Node.js 22 (required for Notion MCP server)
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# npm global prefix for devuser
+ARG HOST_UID=1000
+ARG HOST_GID=1000
+RUN mkdir -p /home/devuser/.npm-global \
+    && chown ${HOST_UID}:${HOST_GID} /home/devuser/.npm-global
+
+# Agent entrypoint script
+COPY docker/entrypoint.agent.sh /entrypoint.agent.sh
+RUN chmod +x /entrypoint.agent.sh
+
+WORKDIR /workspace
+USER devuser
+
+# Install Notion MCP server
+RUN npm config set prefix /home/devuser/.npm-global \
+    && npm install -g @notionhq/notion-mcp-server
+
+# Install Claude Code
+RUN curl -fsSL https://claude.ai/install.sh | bash
+
+# Install Codex CLI
+RUN set -e; \
+    export PATH="/home/devuser/.local/bin:/home/devuser/.npm-global/bin:${PATH}"; \
+    if curl -fsSL https://chatgpt.com/codex/install.sh -o /tmp/codex-install.sh; then \
+        CODEX_NON_INTERACTIVE=1 sh /tmp/codex-install.sh \
+            || { echo "Codex standalone install failed; falling back to npm."; npm install -g @openai/codex; }; \
+    else \
+        echo "Codex standalone installer download failed; falling back to npm."; \
+        npm install -g @openai/codex; \
+    fi; \
+    rm -f /tmp/codex-install.sh; \
+    codex --version
+ENV PATH="/home/devuser/.local/bin:/home/devuser/.npm-global/bin:${PATH}"

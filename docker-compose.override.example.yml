@@ -1,0 +1,50 @@
+# docker-compose.override.example.yml
+#
+# Optional overlay that restores the repo owner's in-container developer tooling
+# (Claude Code / Codex / Notion MCP / SSH + gh) on top of the research image.
+# This is NOT needed to train or evaluate the models — the base
+# docker-compose.yml is fully self-contained for research.
+#
+# Usage:
+#   1. cp docker-compose.override.example.yml docker-compose.override.yml
+#      (docker-compose.override.yml is gitignored and auto-merged by Compose.)
+#   2. Add the personal keys/paths referenced below to your untracked .env:
+#        GITHUB_PERSONAL_ACCESS_TOKEN   OPENAI_API_KEY   CLAUDE_CODE_OAUTH_TOKEN
+#        CODEX_ACCESS_TOKEN             NOTION_TOKEN     HF_TOKEN
+#        SSH_DIR   CLAUDE_CONFIG_DIR    CLAUDE_JSON      CODEX_CONFIG_DIR
+#   3. Build the research base image once, then bring up the agent container:
+#        docker compose -f docker-compose.yml build   # builds ${IMAGE_NAME}
+#        docker compose up -d --build                 # builds ${IMAGE_NAME}-agent FROM it
+#
+# docker/Dockerfile.agent is built FROM the research image, so BASE_IMAGE must
+# match the research image tag produced by docker-compose.yml (${IMAGE_NAME}).
+# The agent image is tagged separately (${IMAGE_NAME}-agent) to avoid a circular
+# FROM; the container name is inherited unchanged from docker-compose.yml.
+
+services:
+  holpcfg:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.agent
+      args:
+        BASE_IMAGE: ${IMAGE_NAME}
+        HOST_UID: ${HOST_UID:-1000}
+        HOST_GID: ${HOST_GID:-1000}
+    image: ${IMAGE_NAME}-agent
+    command: /entrypoint.agent.sh
+
+    environment:
+      - GITHUB_PERSONAL_ACCESS_TOKEN=${GITHUB_PERSONAL_ACCESS_TOKEN}
+      - GH_TOKEN=${GITHUB_PERSONAL_ACCESS_TOKEN}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CLAUDE_CODE_OAUTH_TOKEN=${CLAUDE_CODE_OAUTH_TOKEN}
+      - CODEX_HOME=/home/devuser/.codex
+      - CODEX_ACCESS_TOKEN=${CODEX_ACCESS_TOKEN:-}
+      - NOTION_TOKEN=${NOTION_TOKEN}
+      - HF_TOKEN=${HF_TOKEN}
+
+    volumes:
+      - ${SSH_DIR}:/home/devuser/.ssh:ro
+      - ${CLAUDE_CONFIG_DIR}:/home/devuser/.claude/
+      - ${CLAUDE_JSON}:/home/devuser/.claude.json
+      - ${CODEX_CONFIG_DIR:-${HOME}/.codex}:/home/devuser/.codex/

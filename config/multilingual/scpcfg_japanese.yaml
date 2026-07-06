@@ -1,0 +1,58 @@
+device: 0
+save_dir : 'log'
+
+# SC-PCFG (Simple Compound PCFG, Liu et al. 2023 EMNLP Findings) for KTB Japanese.
+# Mirrors simple_cpcfg_nt2048_t4096_curriculum1.yaml (PTB) with KTB JA paths.
+# Liu et al. 2023 Table 4 reports SC-PCFG NT=2048: S-F1=60.6±3.6 on PTB.
+
+data:
+  train_file: 'data/clean/japanese-ktb-len40-nopunct-train.pickle'
+  val_file:   'data/clean/japanese-ktb-len40-nopunct-val.pickle'
+  test_file:  'data/clean/japanese-ktb-len40-nopunct-test.pickle'
+  vocab_type: 'max_size'
+  vocab_size: 10000
+  min_freq: 2
+
+
+model:
+  model_name: 'SCPCFG'
+  NT: 2048
+  T: 4096
+  s_dim: 512
+  w_dim: 512
+  h_dim: 512
+  z_dim: 64
+  r_dim: -1
+  operation_space: normal
+  entropy: False
+
+
+train:
+  batch_size: 16
+  max_epoch: 30
+  max_len: 40
+  curriculum: 1
+  start_len: 30
+  increment: 1
+  patience: 5
+  clip: 3
+
+test:
+  batch_size: 16
+  max_tokens: 100
+  bucket: 32
+  decode: 'mbr'
+  sampler: 'batch'
+
+optimizer:
+  name: 'adam'
+  lr: 0.002
+  mu: 0.75
+  nu: 0.999
+
+
+wandb:
+  enabled: True
+  project: 'hol-pcfg'
+  run_name: 'scpcfg-nt2048-ja-nll'
+  tags: ['nll-only', 'scpcfg', 'baseline', 'nt2048', 'ja', 'ktb', 'liu2023-table4']
